@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        .stopwatch {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .time-display {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .blinking {
+            animation: blink 1s linear infinite;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        .laps {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .lap-item {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stopwatch">
+        <div class="time-display">00:00:00</div>
+        <div class="button-container">
+            <button class="start">Start</button>
+            <button class="pause">Pause</button>
+            <button class="reset">Reset</button>
+            <button class="lap">Lap</button>
+        </div>
+        <ul class="laps"></ul>
+    </div>
+    <script>
+        const display = document.querySelector('.time-display');
+        const stopwatch = document.querySelector('.stopwatch');
+        const startBtn = document.querySelector('.start');
+        const pauseBtn = document.querySelector('.pause');
+        const resetBtn = document.querySelector('.reset');
+        const lapBtn = document.querySelector('.lap');
+        const lapsList = document.querySelector('.laps');
+
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let running = false;
+
+        function formatTime(time) {
+            const hours = Math.floor(time / 3600);
+            const minutes = Math.floor((time % 3600) / 60);
+            const seconds = time % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            stopwatch.classList.remove('stopped');
+            display.classList.remove('blinking'); // Remove blinking when starting
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(function printTime() {
+                elapsedTime = Date.now() - startTime;
+                display.textContent = formatTime(elapsedTime / 1000);
+            }, 1000);
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            display.classList.add('blinking');
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            display.classList.remove('blinking');
+            display.textContent = '00:00:00';
+            elapsedTime = 0;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            lapsList.innerHTML = '';
+        }
+
+        function lapTime() {
+            const lapTime = formatTime(elapsedTime / 1000);
+            const lapItem = document.createElement('li');
+            lapItem.textContent = lapTime;
+            lapsList.appendChild(lapItem);
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        lapBtn.addEventListener('click', lapTime);
+
+        // Add class to stopwatch when stopped
+        setInterval(() => {
+            if (!running) {
+                stopwatch.classList.toggle('stopped');
+            }
+        }, 500); // Blink every half second when stopped
+    </script>
+</body>
+</html>
